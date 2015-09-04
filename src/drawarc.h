@@ -1,1 +1,1 @@
-void graphics_draw_arc(GContext *ctx, GPoint p, int radius, int thickness, int start, int end);
+void graphics_draw_arc(GContext *ctx, GPoint centre, int radius, int thickness, float start_angle, float end_angle);
