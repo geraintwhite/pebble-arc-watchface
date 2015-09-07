@@ -15,9 +15,9 @@ typedef struct {
 
 static Window *window;
 static TextLayer *text_layer;
-static Layer *arc1_layer;
-static Layer *arc2_layer;
-static Layer *arc3_layer;
+static Layer *hours_layer;
+static Layer *minutes_layer;
+static Layer *seconds_layer;
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   text_layer_set_text(text_layer, "Select");
@@ -58,22 +58,42 @@ static void create_arc_layer(Layer *window_layer, GRect bounds, Layer *arc_layer
   arc_ctx->percent = arc->percent;
 }
 
+static void update_arc(Layer *arc_layer, float p) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Percent %d", (int) (100 * p));
+
+  Arc *arc_ctx = (Arc*) layer_get_data(arc_layer);
+  arc_ctx->percent = p;
+}
+
+static void update_time() {
+  time_t now = time(NULL);
+  struct tm *t = localtime(&now);
+
+  update_arc(hours_layer, t->tm_hour / 12);
+  update_arc(minutes_layer, t->tm_min / 60);
+  update_arc(seconds_layer, t->tm_sec / 60);
+}
+
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
-  create_arc_layer(window_layer, bounds, arc1_layer, &(Arc) {
+  create_arc_layer(window_layer, bounds, hours_layer, &(Arc) {
     .percent = 0.75,
     .radius = 60
   });
-  create_arc_layer(window_layer, bounds, arc2_layer, &(Arc) {
+  create_arc_layer(window_layer, bounds, minutes_layer, &(Arc) {
     .percent = 0.5,
     .radius = 40
   });
-  create_arc_layer(window_layer, bounds, arc3_layer, &(Arc) {
+  create_arc_layer(window_layer, bounds, seconds_layer, &(Arc) {
     .percent = 0.25,
     .radius = 20
   });
+
+  // update_arc(hours_layer, 0.95);
+
+  // update_time();
 
   // text_layer = text_layer_create((GRect) { .origin = { 0, 72 }, .size = { bounds.size.w, 20 } });
   // text_layer_set_text(text_layer, "Press a button");
@@ -83,9 +103,13 @@ static void window_load(Window *window) {
 
 static void window_unload(Window *window) {
   text_layer_destroy(text_layer);
-  layer_destroy(arc1_layer);
-  layer_destroy(arc2_layer);
-  layer_destroy(arc3_layer);
+  layer_destroy(hours_layer);
+  layer_destroy(minutes_layer);
+  layer_destroy(seconds_layer);
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  update_time();
 }
 
 static void init(void) {
@@ -95,8 +119,8 @@ static void init(void) {
     .load = window_load,
     .unload = window_unload,
   });
-  const bool animated = true;
-  window_stack_push(window, animated);
+  window_stack_push(window, true);
+  // tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
 }
 
 static void deinit(void) {
