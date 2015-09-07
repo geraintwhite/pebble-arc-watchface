@@ -40,12 +40,12 @@ static void click_config_provider(void *context) {
 static void arc_update_proc(Layer *layer, GContext *ctx) {
   Arc *arc = (Arc*) layer_get_data(layer);
 
-  GPoint origin = GPoint(SCREEN_WIDTH / 2, (SCREEN_HEIGHT - HEADER_SIZE) / 2);
-  graphics_draw_arc(ctx, origin, arc->radius, CIRCLE_THICKNESS, 0, 360 * arc->percent);
-
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Origin (%d, %d)", SCREEN_WIDTH / 2, (SCREEN_HEIGHT - HEADER_SIZE) / 2);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Radius %d, Percent %d", arc->radius, (int) (arc->percent * 100));
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Start 270, End %d", (int) (360 * arc->percent));
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Start -90, End %d", (int) (360 * arc->percent - 90));
+
+  GPoint origin = GPoint(SCREEN_WIDTH / 2, (SCREEN_HEIGHT - HEADER_SIZE) / 2);
+  graphics_draw_arc(ctx, origin, arc->radius, CIRCLE_THICKNESS, -90, 360 * arc->percent - 90);
 }
 
 static void create_arc_layer(Layer *window_layer, GRect bounds, Layer *arc_layer, Arc *arc) {
