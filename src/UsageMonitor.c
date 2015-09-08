@@ -13,14 +13,14 @@ typedef struct {
 } Arc;
 
 static Window *window;
+static TextLayer *date_layer;
 static Layer *hours_layer;
 static Layer *minutes_layer;
-static Layer *seconds_layer;
 
 static void arc_update_proc(Layer *layer, GContext *ctx) {
   Arc *arc = (Arc*) layer_get_data(layer);
 
-  GPoint origin = GPoint(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+  GPoint origin = GPoint(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 10);
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_draw_arc(ctx, origin, arc->radius, CIRCLE_THICKNESS, -90, 360 * arc->percent - 90);
 }
@@ -46,12 +46,16 @@ static void update_arc(Layer *arc_layer, float p) {
 }
 
 static void update_time() {
+  static char date_text[32];
+
   time_t now = time(NULL);
   struct tm *t = localtime(&now);
 
   update_arc(hours_layer, (float) t->tm_hour / 12);
   update_arc(minutes_layer, (float) t->tm_min / 60);
-  update_arc(seconds_layer, (float) t->tm_sec / 60);
+
+  strftime(date_text, sizeof(date_text), "%B %e", t);
+  text_layer_set_text(date_layer, date_text);
 }
 
 static void window_load(Window *window) {
@@ -60,24 +64,27 @@ static void window_load(Window *window) {
 
   hours_layer = create_arc_layer(window_layer, bounds, hours_layer, &(Arc) {
     .percent = 0,
-    .radius = 20
+    .radius = 40
   });
   minutes_layer = create_arc_layer(window_layer, bounds, minutes_layer, &(Arc) {
     .percent = 0,
-    .radius = 40
-  });
-  seconds_layer = create_arc_layer(window_layer, bounds, seconds_layer, &(Arc) {
-    .percent = 0,
     .radius = 60
   });
+
+  date_layer = text_layer_create(GRect(0, SCREEN_HEIGHT - 30, SCREEN_WIDTH, 20));
+  text_layer_set_background_color(date_layer, GColorClear);
+  text_layer_set_text_color(date_layer, GColorWhite);
+  text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(date_layer));
 
   update_time();
 }
 
 static void window_unload(Window *window) {
+  text_layer_destroy(date_layer);
   layer_destroy(hours_layer);
   layer_destroy(minutes_layer);
-  layer_destroy(seconds_layer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -92,6 +99,7 @@ static void init(void) {
     .unload = window_unload,
   });
   window_stack_push(window, true);
+
   tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
 }
 
