@@ -1,8 +1,8 @@
 {
   "uuid": "7f6532f3-59a2-4fd2-9885-2371c0531df3",
-  "shortName": "UsageMonitor",
-  "longName": "UsageMonitor",
-  "companyName": "MakeAwesomeHappen",
+  "shortName": "Arc Time",
+  "longName": "Arc Time",
+  "companyName": "geraintwhite@gmail.com",
   "versionLabel": "1.0",
   "sdkVersion": "3",
   "targetPlatforms": ["aplite", "basalt"],
