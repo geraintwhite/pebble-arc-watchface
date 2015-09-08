@@ -13,9 +13,17 @@ typedef struct {
 } Arc;
 
 static Window *window;
+static TextLayer *battery_layer;
 static TextLayer *date_layer;
 static Layer *hours_layer;
 static Layer *minutes_layer;
+
+static void battery_handler(BatteryChargeState charge_state) {
+  static char battery_text[16];
+
+  snprintf(battery_text, sizeof(battery_text), "%d%%", charge_state.charge_percent);
+  text_layer_set_text(battery_layer, battery_text);
+}
 
 static void arc_update_proc(Layer *layer, GContext *ctx) {
   Arc *arc = (Arc*) layer_get_data(layer);
@@ -71,6 +79,13 @@ static void window_load(Window *window) {
     .radius = 60
   });
 
+  battery_layer = text_layer_create(GRect(0, SCREEN_HEIGHT / 2 - 20, SCREEN_WIDTH, 20));
+  text_layer_set_background_color(battery_layer, GColorClear);
+  text_layer_set_text_color(battery_layer, GColorWhite);
+  text_layer_set_font(battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_text_alignment(battery_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(battery_layer));
+
   date_layer = text_layer_create(GRect(0, SCREEN_HEIGHT - 30, SCREEN_WIDTH, 20));
   text_layer_set_background_color(date_layer, GColorClear);
   text_layer_set_text_color(date_layer, GColorWhite);
@@ -78,10 +93,12 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(date_layer));
 
+  battery_handler(battery_state_service_peek());
   update_time();
 }
 
 static void window_unload(Window *window) {
+  text_layer_destroy(battery_layer);
   text_layer_destroy(date_layer);
   layer_destroy(hours_layer);
   layer_destroy(minutes_layer);
@@ -100,6 +117,7 @@ static void init(void) {
   });
   window_stack_push(window, true);
 
+  battery_state_service_subscribe(battery_handler);
   tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
 }
 
