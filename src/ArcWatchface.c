@@ -118,7 +118,7 @@ static void init(void) {
   window_stack_push(window, true);
 
   battery_state_service_subscribe(battery_handler);
-  tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
+  tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 }
 
 static void deinit(void) {
