@@ -18,6 +18,27 @@ static TextLayer *date_layer;
 static Layer *hours_layer;
 static Layer *minutes_layer;
 
+
+static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+  Tuple *t = dict_read_first(iter);
+  while(t) {
+    switch(t->key) {
+      case KEY_BATTERY_PERCENTAGE:
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "KEY_BATTERY_PERCENTAGE: %d", t->value->int32);
+        persist_write_bool(KEY_BATTERY_PERCENTAGE, t->value->int32);
+        break;
+      case KEY_SHOW_DATE:
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "KEY_SHOW_DATE: %d", t->value->int32);
+        persist_write_bool(KEY_SHOW_DATE, t->value->int32);
+        break;
+      default:
+        APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int) t->key);
+        break;
+    }
+    t = dict_read_next(iter);
+  }
+}
+
 static void battery_handler(BatteryChargeState charge_state) {
   static char battery_text[16];
 
@@ -119,6 +140,9 @@ static void init(void) {
 
   battery_state_service_subscribe(battery_handler);
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+
+  app_message_register_inbox_received(inbox_received_handler);
+  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 }
 
 static void deinit(void) {
