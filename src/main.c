@@ -1,13 +1,11 @@
 #include <pebble.h>
 #include "drawarc.h"
 
-enum {
-  SCREEN_WIDTH = 144,
-  SCREEN_HEIGHT = 168,
-  CIRCLE_THICKNESS = 5,
-  KEY_BATTERY_PERCENTAGE = 0,
-  KEY_SHOW_DATE = 1
-};
+#define SCREEN_WIDTH            144
+#define SCREEN_HEIGHT           168
+#define CIRCLE_THICKNESS        5
+#define KEY_BATTERY_PERCENTAGE  0
+#define KEY_SHOW_DATE           1
 
 typedef struct {
   float percent;
