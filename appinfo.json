@@ -6,12 +6,13 @@
   "versionLabel": "1.1",
   "sdkVersion": "3",
   "targetPlatforms": ["aplite", "basalt"],
-  "capabilities": [ "configurable" ],
+  "capabilities": ["configurable"],
   "watchapp": {
     "watchface": true
   },
   "appKeys": {
-    "dummy": 0
+    "KEY_BATTERY_PERCENTAGE": 0,
+    "KEY_SHOW_DATE": 1
   },
   "resources": {
     "media": []

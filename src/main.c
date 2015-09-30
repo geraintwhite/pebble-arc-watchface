@@ -4,7 +4,9 @@
 enum {
   SCREEN_WIDTH = 144,
   SCREEN_HEIGHT = 168,
-  CIRCLE_THICKNESS = 5
+  CIRCLE_THICKNESS = 5,
+  KEY_BATTERY_PERCENTAGE = 0,
+  KEY_SHOW_DATE = 1
 };
 
 typedef struct {
