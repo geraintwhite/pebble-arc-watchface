@@ -1,4 +1,3 @@
-
 #
 # This file is the default set of rules to compile a Pebble project.
 #
