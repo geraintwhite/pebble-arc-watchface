@@ -24,11 +24,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   while(t) {
     switch(t->key) {
       case KEY_BATTERY_PERCENTAGE:
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "KEY_BATTERY_PERCENTAGE: %d", t->value->int32);
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "KEY_BATTERY_PERCENTAGE: %d", (int) t->value->int32);
         persist_write_bool(KEY_BATTERY_PERCENTAGE, t->value->int32);
         break;
       case KEY_SHOW_DATE:
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "KEY_SHOW_DATE: %d", t->value->int32);
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "KEY_SHOW_DATE: %d", (int) t->value->int32);
         persist_write_bool(KEY_SHOW_DATE, t->value->int32);
         break;
       default:
