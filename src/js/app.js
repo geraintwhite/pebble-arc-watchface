@@ -1,3 +1,25 @@
+Pebble.addEventListener('ready', function() {
+  console.log('PebbleKit JS ready!');
+});
+
 Pebble.addEventListener('showConfiguration', function(e) {
-  Pebble.openURL('https://localhost:8000/');
+  var url = 'http://localhost:8000/config/index.html?options=batteryPercentage+showDate';
+  console.log('Showing configuration page: ' + url);
+  Pebble.openURL(url);
+});
+
+Pebble.addEventListener('webviewclosed', function(e) {
+  var config = JSON.parse(decodeURIComponent(e.response));
+  console.log('Config window returned: ', JSON.stringify(config));
+
+  var data = {
+    'KEY_BATTERY_PERCENTAGE': config.batteryPercentage,
+    'KEY_SHOW_DATE': config.showDate
+  };
+
+  Pebble.sendAppMessage(data, function() {
+    console.log('Sent config data to Pebble');
+  }, function() {
+    console.log('Failed to send config data!');
+  });
 });
