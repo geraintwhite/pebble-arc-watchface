@@ -13,8 +13,8 @@ Pebble.addEventListener('webviewclosed', function(e) {
   console.log('Config window returned: ' + JSON.stringify(config));
 
   var data = {
-    'KEY_BATTERY_PERCENTAGE': config.batteryPercentage,
-    'KEY_SHOW_DATE': config.showDate
+    'KEY_BATTERY_PERCENTAGE': config.batteryPercentage ? 1 : 0,
+    'KEY_SHOW_DATE': config.showDate ? 1 : 0
   };
 
   Pebble.sendAppMessage(data, function() {
