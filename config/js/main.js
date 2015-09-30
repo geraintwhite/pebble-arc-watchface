@@ -1,43 +1,62 @@
 (function() {
-  loadOptions();
-  submitHandler();
+  var options = buildOptions();
+
+  console.log('Showing options: ' + JSON.stringify(Object.keys(options)));
+
+  loadOptions(options);
+  submitHandler(options);
 })();
 
-function submitHandler() {
-  var submitButton = document.getElementById('submitButton');
+function buildOptions() {
+  var options = {};
+  var neededOpts = getQueryParam('options');
 
-  submitButton.on('click', function() {
-    console.log('Submit');
+  neededOpts = neededOpts ? neededOpts.split('+') : [];
 
-    var return_to = getQueryParam('return_to', 'pebblejs://close#');
-    document.location = return_to + encodeURIComponent(JSON.stringify(getAndStoreConfigData()));
+  $('.app-setting').each(function() {
+    var key = $(this).find('input').prop('id');
+    if (!neededOpts.length || neededOpts.indexOf(key) > -1) {
+      options[key] = $(this).find('input');
+    } else {
+      $(this).remove();
+    }
   });
+
+  return options;
 }
 
-function loadOptions() {
-  var hourlyVibrateCheckbox = document.getElementById('hourlyVibrateCheckbox');
-  var timeFormatCheckbox = document.getElementById('timeFormatCheckbox');
+function loadOptions(options) {
+  if (localStorage.pebbleOptions) {
+    var data = JSON.parse(localStorage.pebbleOptions);
 
-  if (localStorage.hourlyVibrate) {
-    hourlyVibrateCheckbox[0].checked = JSON.parse(localStorage.hourlyVibrate);
-    timeFormatCheckbox[0].checked = JSON.parse(localStorage.twentyFourHourFormat);
+    for (var key in data) {
+      if (options[key] !== undefined) {
+        options[key].prop('checked', data[key]);
+      }
+    }
   }
 }
 
-function getAndStoreConfigData() {
-  var hourlyVibrateCheckbox = document.getElementById('hourlyVibrateCheckbox');
-  var timeFormatCheckbox = document.getElementById('timeFormatCheckbox');
+function submitHandler(options) {
+  var submitButton = $('#submitButton');
 
-  var options = {
-    hourlyVibrate: hourlyVibrateCheckbox.checked,
-    twentyFourHourFormat: timeFormatCheckbox[0].checked
-  };
+  submitButton.on('click', function() {
+    var return_to = getQueryParam('return_to', 'pebblejs://close#');
+    document.location = return_to + encodeURIComponent(JSON.stringify(getConfig(options)));
+  });
+}
 
-  localStorage.hourlyVibrate = options.hourlyVibrate;
-  localStorage.twentyFourHourFormat = options.twentyFourHourFormat;
+function getConfig(options) {
+  var config = {};
 
-  console.log('Got options: ' + JSON.stringify(options));
-  return options;
+  for (var key in options) {
+    config[key] = options[key].prop('checked');
+  }
+
+  localStorage.pebbleOptions = JSON.stringify(config);
+
+  console.log('Got config: ' + JSON.stringify(config));
+  return config;
 }
 
 function getQueryParam(variable, defaultValue) {
