@@ -1,0 +1,7 @@
+{
+  "copy_from": "config",
+  "email": [
+    "mail@geraintwhite.co.uk"
+  ],
+  "copy_to": "/var/www/pebble.geraintwhite.co.uk/ArcWatchface"
+}
