@@ -1,8 +1,6 @@
 #include <pebble.h>
 #include "drawarc.h"
 
-#define SCREEN_WIDTH            144
-#define SCREEN_HEIGHT           168
 #define CIRCLE_THICKNESS        5
 #define KEY_BATTERY_PERCENTAGE  0
 #define KEY_SHOW_DATE           1
@@ -47,9 +45,10 @@ static void battery_handler(BatteryChargeState charge_state) {
 }
 
 static void arc_update_proc(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
   Arc *arc = (Arc*) layer_get_data(layer);
 
-  GPoint origin = GPoint(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 10);
+  GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2 - MARGIN);
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_draw_arc(ctx, origin, arc->radius, CIRCLE_THICKNESS, -90, 360 * arc->percent - 90);
 }
@@ -100,14 +99,14 @@ static void window_load(Window *window) {
     .radius = 60
   });
 
-  battery_layer = text_layer_create(GRect(0, SCREEN_HEIGHT / 2 - 20, SCREEN_WIDTH, 20));
+  battery_layer = text_layer_create(GRect(0, bounds.size.h / 2 - 20, bounds.size.w, 20));
   text_layer_set_background_color(battery_layer, GColorClear);
   text_layer_set_text_color(battery_layer, GColorWhite);
   text_layer_set_font(battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   text_layer_set_text_alignment(battery_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(battery_layer));
 
-  date_layer = text_layer_create(GRect(0, SCREEN_HEIGHT - 30, SCREEN_WIDTH, 20));
+  date_layer = text_layer_create(GRect(0, bounds.size.h - 30, bounds.size.w, 20));
   text_layer_set_background_color(date_layer, GColorClear);
   text_layer_set_text_color(date_layer, GColorWhite);
   text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
