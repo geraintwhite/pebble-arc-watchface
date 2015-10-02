@@ -10,6 +10,11 @@ typedef struct {
   int radius;
 } Arc;
 
+static int BATTERY_PERCENTAGE = 1;
+static int SHOW_DATE = 1;
+
+static int MARGIN = 0;
+
 static Window *window;
 static TextLayer *battery_layer;
 static TextLayer *date_layer;
@@ -17,24 +22,35 @@ static Layer *hours_layer;
 static Layer *minutes_layer;
 
 
-static void inbox_received_handler(DictionaryIterator *iter, void *context) {
-  Tuple *t = dict_read_first(iter);
-  while(t) {
-    switch(t->key) {
-      case KEY_BATTERY_PERCENTAGE:
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "KEY_BATTERY_PERCENTAGE: %d", (int) t->value->int32);
-        persist_write_bool(KEY_BATTERY_PERCENTAGE, t->value->int32);
-        break;
-      case KEY_SHOW_DATE:
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "KEY_SHOW_DATE: %d", (int) t->value->int32);
-        persist_write_bool(KEY_SHOW_DATE, t->value->int32);
-        break;
-      default:
-        APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int) t->key);
-        break;
-    }
-    t = dict_read_next(iter);
+static void update_settings() {
+  if (persist_exists(KEY_BATTERY_PERCENTAGE)) {
+    BATTERY_PERCENTAGE = persist_read_int(KEY_BATTERY_PERCENTAGE);
   }
+  layer_set_hidden(text_layer_get_layer(battery_layer), BATTERY_PERCENTAGE == 0);
+
+  if (persist_exists(KEY_SHOW_DATE)) {
+    SHOW_DATE = persist_read_int(KEY_SHOW_DATE);
+  }
+  layer_set_hidden(text_layer_get_layer(date_layer), SHOW_DATE == 0);
+
+  MARGIN = SHOW_DATE ? 10 : 0;
+
+  GRect bounds = layer_get_bounds((Layer*) battery_layer);
+  bounds.origin.y = bounds.size.h / 2 - (10 + MARGIN);
+}
+
+static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+  Tuple *show_battery = dict_find(iter, KEY_BATTERY_PERCENTAGE);
+  if (show_battery) {
+    persist_write_int(KEY_BATTERY_PERCENTAGE, show_battery->value->uint8);
+  }
+
+  Tuple *show_date = dict_find(iter, KEY_SHOW_DATE);
+  if (show_date) {
+    persist_write_int(KEY_SHOW_DATE, show_date->value->uint8);
+  }
+
+  update_settings();
 }
 
 static void battery_handler(BatteryChargeState charge_state) {
@@ -114,6 +130,7 @@ static void window_load(Window *window) {
   layer_add_child(window_layer, text_layer_get_layer(date_layer));
 
   battery_handler(battery_state_service_peek());
+  update_settings();
   update_time();
 }
 
