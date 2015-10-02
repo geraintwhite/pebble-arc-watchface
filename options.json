@@ -3,5 +3,6 @@
   "email": [
     "mail@geraintwhite.co.uk"
   ],
-  "copy_to": "/var/www/pebble.geraintwhite.co.uk/ArcWatchface"
+  "copy_to": "/var/www/pebble.geraintwhite.co.uk/ArcWatchface",
+  "url": "http://pebble.geraintwhite.co.uk/ArcWatchface"
 }
