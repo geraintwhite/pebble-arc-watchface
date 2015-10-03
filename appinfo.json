@@ -3,7 +3,7 @@
   "shortName": "Arc Watchface",
   "longName": "Arc Watchface",
   "companyName": "geraintwhite@gmail.com",
-  "versionLabel": "1.2",
+  "versionLabel": "1.3",
   "sdkVersion": "3",
   "targetPlatforms": ["aplite", "basalt"],
   "capabilities": ["configurable"],
