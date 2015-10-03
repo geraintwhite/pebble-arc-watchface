@@ -13,7 +13,7 @@ typedef struct {
 static int BATTERY_PERCENTAGE = 1;
 static int SHOW_DATE = 1;
 
-static int MARGIN = 0;
+static int MARGIN = 10;
 
 static Window *window;
 static TextLayer *battery_layer;
@@ -22,24 +22,7 @@ static Layer *hours_layer;
 static Layer *minutes_layer;
 
 
-static void update_settings() {
-  if (persist_exists(KEY_BATTERY_PERCENTAGE)) {
-    BATTERY_PERCENTAGE = persist_read_int(KEY_BATTERY_PERCENTAGE);
-  }
-  layer_set_hidden(text_layer_get_layer(battery_layer), BATTERY_PERCENTAGE == 0);
-
-  if (persist_exists(KEY_SHOW_DATE)) {
-    SHOW_DATE = persist_read_int(KEY_SHOW_DATE);
-  }
-  layer_set_hidden(text_layer_get_layer(date_layer), SHOW_DATE == 0);
-
-  MARGIN = SHOW_DATE ? 10 : 0;
-
-  GRect bounds = layer_get_bounds((Layer*) battery_layer);
-  bounds.origin.y = bounds.size.h / 2 - (10 + MARGIN);
-}
-
-static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+static void save_settings(DictionaryIterator *iter) {
   Tuple *show_battery = dict_find(iter, KEY_BATTERY_PERCENTAGE);
   if (show_battery) {
     persist_write_int(KEY_BATTERY_PERCENTAGE, show_battery->value->uint8);
@@ -49,8 +32,18 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   if (show_date) {
     persist_write_int(KEY_SHOW_DATE, show_date->value->uint8);
   }
+}
 
-  update_settings();
+static void update_settings() {
+  if (persist_exists(KEY_BATTERY_PERCENTAGE)) {
+    BATTERY_PERCENTAGE = persist_read_int(KEY_BATTERY_PERCENTAGE);
+  }
+
+  if (persist_exists(KEY_SHOW_DATE)) {
+    SHOW_DATE = persist_read_int(KEY_SHOW_DATE);
+  }
+
+  MARGIN = SHOW_DATE ? 10 : 0;
 }
 
 static void battery_handler(BatteryChargeState charge_state) {
@@ -106,6 +99,8 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
+  update_settings();
+
   hours_layer = create_arc_layer(window_layer, bounds, hours_layer, &(Arc) {
     .percent = 0,
     .radius = 40
@@ -115,12 +110,14 @@ static void window_load(Window *window) {
     .radius = 60
   });
 
-  battery_layer = text_layer_create(GRect(0, bounds.size.h / 2 - 20, bounds.size.w, 20));
+  battery_layer = text_layer_create(GRect(0, bounds.size.h / 2 - (10 + MARGIN), bounds.size.w, 20));
   text_layer_set_background_color(battery_layer, GColorClear);
   text_layer_set_text_color(battery_layer, GColorWhite);
   text_layer_set_font(battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   text_layer_set_text_alignment(battery_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(battery_layer));
+  layer_set_hidden(text_layer_get_layer(battery_layer), BATTERY_PERCENTAGE == 0);
+
 
   date_layer = text_layer_create(GRect(0, bounds.size.h - 30, bounds.size.w, 20));
   text_layer_set_background_color(date_layer, GColorClear);
@@ -128,9 +125,9 @@ static void window_load(Window *window) {
   text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(date_layer));
+  layer_set_hidden(text_layer_get_layer(date_layer), SHOW_DATE == 0);
 
   battery_handler(battery_state_service_peek());
-  update_settings();
   update_time();
 }
 
@@ -139,6 +136,12 @@ static void window_unload(Window *window) {
   text_layer_destroy(date_layer);
   layer_destroy(hours_layer);
   layer_destroy(minutes_layer);
+}
+
+static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+  save_settings(iter);
+  window_unload(window);
+  window_load(window);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
