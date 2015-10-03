@@ -12,7 +12,8 @@
   },
   "appKeys": {
     "KEY_BATTERY_PERCENTAGE": 0,
-    "KEY_SHOW_DATE": 1
+    "KEY_SHOW_DATE": 1,
+    "KEY_INVERT_COLOURS": 2
   },
   "resources": {
     "media": []

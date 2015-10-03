@@ -4,6 +4,7 @@
 #define CIRCLE_THICKNESS        5
 #define KEY_BATTERY_PERCENTAGE  0
 #define KEY_SHOW_DATE           1
+#define KEY_INVERT_COLOURS      2
 
 typedef struct {
   float percent;
@@ -12,6 +13,7 @@ typedef struct {
 
 static int BATTERY_PERCENTAGE = 1;
 static int SHOW_DATE = 1;
+static int INVERT_COLOURS = 0;
 
 static int MARGIN = 10;
 
@@ -32,6 +34,11 @@ static void save_settings(DictionaryIterator *iter) {
   if (show_date) {
     persist_write_int(KEY_SHOW_DATE, show_date->value->uint8);
   }
+
+  Tuple *invert_colours = dict_find(iter, KEY_INVERT_COLOURS);
+  if (invert_colours) {
+    persist_write_int(KEY_INVERT_COLOURS, invert_colours->value->uint8);
+  }
 }
 
 static void update_settings() {
@@ -41,6 +48,10 @@ static void update_settings() {
 
   if (persist_exists(KEY_SHOW_DATE)) {
     SHOW_DATE = persist_read_int(KEY_SHOW_DATE);
+  }
+
+  if (persist_exists(KEY_INVERT_COLOURS)) {
+    INVERT_COLOURS = persist_read_int(KEY_INVERT_COLOURS);
   }
 
   MARGIN = SHOW_DATE ? 10 : 0;
@@ -58,7 +69,7 @@ static void arc_update_proc(Layer *layer, GContext *ctx) {
   Arc *arc = (Arc*) layer_get_data(layer);
 
   GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2 - MARGIN);
-  graphics_context_set_stroke_color(ctx, GColorWhite);
+  graphics_context_set_stroke_color(ctx, INVERT_COLOURS ? GColorBlack : GColorWhite);
   graphics_draw_arc(ctx, origin, arc->radius, CIRCLE_THICKNESS, -90, 360 * arc->percent - 90);
 }
 
@@ -101,6 +112,8 @@ static void window_load(Window *window) {
 
   update_settings();
 
+  window_set_background_color(window, INVERT_COLOURS ? GColorWhite : GColorBlack);
+
   hours_layer = create_arc_layer(window_layer, bounds, hours_layer, &(Arc) {
     .percent = 0,
     .radius = 40
@@ -112,7 +125,7 @@ static void window_load(Window *window) {
 
   battery_layer = text_layer_create(GRect(0, bounds.size.h / 2 - (10 + MARGIN), bounds.size.w, 20));
   text_layer_set_background_color(battery_layer, GColorClear);
-  text_layer_set_text_color(battery_layer, GColorWhite);
+  text_layer_set_text_color(battery_layer, INVERT_COLOURS ? GColorBlack : GColorWhite);
   text_layer_set_font(battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   text_layer_set_text_alignment(battery_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(battery_layer));
@@ -121,7 +134,7 @@ static void window_load(Window *window) {
 
   date_layer = text_layer_create(GRect(0, bounds.size.h - 30, bounds.size.w, 20));
   text_layer_set_background_color(date_layer, GColorClear);
-  text_layer_set_text_color(date_layer, GColorWhite);
+  text_layer_set_text_color(date_layer, INVERT_COLOURS ? GColorBlack : GColorWhite);
   text_layer_set_font(date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(date_layer));
@@ -150,7 +163,6 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 static void init(void) {
   window = window_create();
-  window_set_background_color(window, GColorBlack);
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
