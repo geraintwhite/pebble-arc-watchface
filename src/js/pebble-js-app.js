@@ -3,7 +3,7 @@ Pebble.addEventListener('ready', function() {
 });
 
 Pebble.addEventListener('showConfiguration', function(e) {
-  var url = 'http://pebble.geraintwhite.co.uk/ArcWatchface?options=batteryPercentage+showDate';
+  var url = 'http://pebble.geraintwhite.co.uk/?options=batteryPercentage+showDate';
   console.log('Showing configuration page: ' + url);
   Pebble.openURL(url);
 });
