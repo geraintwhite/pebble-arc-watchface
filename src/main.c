@@ -5,6 +5,7 @@
 #define KEY_BATTERY_PERCENTAGE  0
 #define KEY_SHOW_DATE           1
 #define KEY_INVERT_COLOURS      2
+#define KEY_BLUETOOTH_VIBRATE   3
 
 typedef struct {
   float percent;
@@ -14,8 +15,11 @@ typedef struct {
 static int BATTERY_PERCENTAGE = 1;
 static int SHOW_DATE = 1;
 static int INVERT_COLOURS = 0;
+static int BLUETOOTH_VIBRATE = 0;
 
 static int MARGIN = 10;
+
+bool bluetooth_connected = true;
 
 static Window *window;
 static TextLayer *battery_layer;
@@ -39,6 +43,11 @@ static void save_settings(DictionaryIterator *iter) {
   if (invert_colours) {
     persist_write_int(KEY_INVERT_COLOURS, invert_colours->value->uint8);
   }
+
+  Tuple *bluetooth_vibrate = dict_find(iter, KEY_BLUETOOTH_VIBRATE);
+  if (bluetooth_vibrate) {
+    persist_write_int(KEY_BLUETOOTH_VIBRATE, bluetooth_vibrate->value->uint8);
+  }
 }
 
 static void update_settings() {
@@ -54,6 +63,10 @@ static void update_settings() {
     INVERT_COLOURS = persist_read_int(KEY_INVERT_COLOURS);
   }
 
+  if (persist_exists(KEY_BLUETOOTH_VIBRATE)) {
+    BLUETOOTH_VIBRATE = persist_read_int(KEY_BLUETOOTH_VIBRATE);
+  }
+
   MARGIN = SHOW_DATE ? 10 : 0;
 }
 
@@ -62,6 +75,13 @@ static void battery_handler(BatteryChargeState charge_state) {
 
   snprintf(battery_text, sizeof(battery_text), "%d%%", charge_state.charge_percent);
   text_layer_set_text(battery_layer, battery_text);
+}
+
+static void bluetooth_handler(bool connected) {
+  if (connected != bluetooth_connected) {
+    bluetooth_connected = connected;
+    vibes_double_pulse();
+  }
 }
 
 static void arc_update_proc(Layer *layer, GContext *ctx) {
@@ -141,6 +161,7 @@ static void window_load(Window *window) {
   layer_set_hidden(text_layer_get_layer(date_layer), SHOW_DATE == 0);
 
   battery_handler(battery_state_service_peek());
+  bluetooth_connected = bluetooth_connection_service_peek();
   update_time();
 }
 
@@ -170,6 +191,7 @@ static void init(void) {
   window_stack_push(window, true);
 
   battery_state_service_subscribe(battery_handler);
+  bluetooth_connection_service_subscribe(bluetooth_handler);
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 
   app_message_register_inbox_received(inbox_received_handler);

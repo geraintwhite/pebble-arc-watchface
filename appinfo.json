@@ -13,7 +13,8 @@
   "appKeys": {
     "KEY_BATTERY_PERCENTAGE": 0,
     "KEY_SHOW_DATE": 1,
-    "KEY_INVERT_COLOURS": 2
+    "KEY_INVERT_COLOURS": 2,
+    "KEY_BLUETOOTH_VIBRATE": 3
   },
   "resources": {
     "media": []

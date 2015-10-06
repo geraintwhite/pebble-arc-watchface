@@ -3,7 +3,7 @@ Pebble.addEventListener('ready', function() {
 });
 
 Pebble.addEventListener('showConfiguration', function(e) {
-  var url = 'http://pebble.geraintwhite.co.uk/?options=batteryPercentage+showDate+invertColours';
+  var url = 'http://pebble.geraintwhite.co.uk/?options=batteryPercentage+showDate+invertColours+bluetoothVibrate';
   console.log('Showing configuration page: ' + url);
   Pebble.openURL(url);
 });
@@ -15,7 +15,8 @@ Pebble.addEventListener('webviewclosed', function(e) {
   var data = {
     'KEY_BATTERY_PERCENTAGE': config.batteryPercentage ? 1 : 0,
     'KEY_SHOW_DATE': config.showDate ? 1 : 0,
-    'KEY_INVERT_COLOURS': config.invertColours ? 1 : 0
+    'KEY_INVERT_COLOURS': config.invertColours ? 1 : 0,
+    'KEY_BLUETOOTH_VIBRATE': config.bluetoothVibrate ? 1 : 0
   };
 
   Pebble.sendAppMessage(data, function() {
