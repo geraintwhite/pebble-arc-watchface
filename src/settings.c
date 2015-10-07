@@ -1,5 +1,3 @@
-#include <pebble.h>
-
 void save_setting(DictionaryIterator *iter, int KEY) {
   Tuple *data = dict_find(iter, KEY);
   if (data) {

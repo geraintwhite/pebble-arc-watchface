@@ -14,9 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <pebble.h>
-#include "drawarc.h"
-
 void graphics_draw_arc(GContext *ctx, GPoint p, int radius, int thickness, int start, int end) {
   start = start % 360;
   end = end % 360;
