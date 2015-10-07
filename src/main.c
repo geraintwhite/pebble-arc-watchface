@@ -13,11 +13,11 @@ typedef struct {
   int radius;
 } Arc;
 
-static int BATTERY_PERCENTAGE = 1;
-static int SHOW_DATE = 1;
-static int INVERT_COLOURS = 0;
-static int BLUETOOTH_VIBRATE = 0;
-static int HOURLY_VIBRATE = 0;
+static bool BATTERY_PERCENTAGE = true;
+static bool SHOW_DATE = true;
+static bool INVERT_COLOURS = false;
+static bool BLUETOOTH_VIBRATE = false;
+static bool HOURLY_VIBRATE = false;
 
 static int MARGIN = 10;
 
