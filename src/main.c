@@ -1,5 +1,6 @@
 #include <pebble.h>
-#include "drawarc.h"
+#include "drawarc.c"
+#include "settings.c"
 
 #define CIRCLE_THICKNESS        5
 #define KEY_BATTERY_PERCENTAGE  0
@@ -31,52 +32,19 @@ static Layer *minutes_layer;
 
 
 static void save_settings(DictionaryIterator *iter) {
-  Tuple *show_battery = dict_find(iter, KEY_BATTERY_PERCENTAGE);
-  if (show_battery) {
-    persist_write_int(KEY_BATTERY_PERCENTAGE, show_battery->value->uint8);
-  }
-
-  Tuple *show_date = dict_find(iter, KEY_SHOW_DATE);
-  if (show_date) {
-    persist_write_int(KEY_SHOW_DATE, show_date->value->uint8);
-  }
-
-  Tuple *invert_colours = dict_find(iter, KEY_INVERT_COLOURS);
-  if (invert_colours) {
-    persist_write_int(KEY_INVERT_COLOURS, invert_colours->value->uint8);
-  }
-
-  Tuple *bluetooth_vibrate = dict_find(iter, KEY_BLUETOOTH_VIBRATE);
-  if (bluetooth_vibrate) {
-    persist_write_int(KEY_BLUETOOTH_VIBRATE, bluetooth_vibrate->value->uint8);
-  }
-
-  Tuple *hourly_vibrate = dict_find(iter, KEY_HOURLY_VIBRATE);
-  if (hourly_vibrate) {
-    persist_write_int(KEY_HOURLY_VIBRATE, hourly_vibrate->value->uint8);
-  }
+  save_setting(iter, KEY_BATTERY_PERCENTAGE);
+  save_setting(iter, KEY_SHOW_DATE);
+  save_setting(iter, KEY_INVERT_COLOURS);
+  save_setting(iter, KEY_BLUETOOTH_VIBRATE);
+  save_setting(iter, KEY_HOURLY_VIBRATE);
 }
 
 static void update_settings() {
-  if (persist_exists(KEY_BATTERY_PERCENTAGE)) {
-    BATTERY_PERCENTAGE = persist_read_int(KEY_BATTERY_PERCENTAGE);
-  }
-
-  if (persist_exists(KEY_SHOW_DATE)) {
-    SHOW_DATE = persist_read_int(KEY_SHOW_DATE);
-  }
-
-  if (persist_exists(KEY_INVERT_COLOURS)) {
-    INVERT_COLOURS = persist_read_int(KEY_INVERT_COLOURS);
-  }
-
-  if (persist_exists(KEY_BLUETOOTH_VIBRATE)) {
-    BLUETOOTH_VIBRATE = persist_read_int(KEY_BLUETOOTH_VIBRATE);
-  }
-
-  if (persist_exists(KEY_HOURLY_VIBRATE)) {
-    HOURLY_VIBRATE = persist_read_int(KEY_HOURLY_VIBRATE);
-  }
+  BATTERY_PERCENTAGE = load_setting(KEY_BATTERY_PERCENTAGE, BATTERY_PERCENTAGE);
+  SHOW_DATE = load_setting(KEY_SHOW_DATE, SHOW_DATE);
+  INVERT_COLOURS = load_setting(KEY_INVERT_COLOURS, INVERT_COLOURS);
+  BLUETOOTH_VIBRATE = load_setting(KEY_BLUETOOTH_VIBRATE, BLUETOOTH_VIBRATE);
+  HOURLY_VIBRATE = load_setting(KEY_HOURLY_VIBRATE, HOURLY_VIBRATE);
 
   MARGIN = SHOW_DATE ? 10 : 0;
 }
@@ -165,7 +133,6 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(battery_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(battery_layer));
   layer_set_hidden(text_layer_get_layer(battery_layer), BATTERY_PERCENTAGE == 0);
-
 
   date_layer = text_layer_create(GRect(0, bounds.size.h - 30, bounds.size.w, 20));
   text_layer_set_background_color(date_layer, GColorClear);
