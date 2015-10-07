@@ -6,6 +6,7 @@
 #define KEY_SHOW_DATE           1
 #define KEY_INVERT_COLOURS      2
 #define KEY_BLUETOOTH_VIBRATE   3
+#define KEY_HOURLY_VIBRATE      4
 
 typedef struct {
   float percent;
@@ -16,6 +17,7 @@ static int BATTERY_PERCENTAGE = 1;
 static int SHOW_DATE = 1;
 static int INVERT_COLOURS = 0;
 static int BLUETOOTH_VIBRATE = 0;
+static int HOURLY_VIBRATE = 0;
 
 static int MARGIN = 10;
 
@@ -48,6 +50,11 @@ static void save_settings(DictionaryIterator *iter) {
   if (bluetooth_vibrate) {
     persist_write_int(KEY_BLUETOOTH_VIBRATE, bluetooth_vibrate->value->uint8);
   }
+
+  Tuple *hourly_vibrate = dict_find(iter, KEY_HOURLY_VIBRATE);
+  if (hourly_vibrate) {
+    persist_write_int(KEY_HOURLY_VIBRATE, hourly_vibrate->value->uint8);
+  }
 }
 
 static void update_settings() {
@@ -65,6 +72,10 @@ static void update_settings() {
 
   if (persist_exists(KEY_BLUETOOTH_VIBRATE)) {
     BLUETOOTH_VIBRATE = persist_read_int(KEY_BLUETOOTH_VIBRATE);
+  }
+
+  if (persist_exists(KEY_HOURLY_VIBRATE)) {
+    HOURLY_VIBRATE = persist_read_int(KEY_HOURLY_VIBRATE);
   }
 
   MARGIN = SHOW_DATE ? 10 : 0;
@@ -124,6 +135,10 @@ static void update_time() {
 
   strftime(date_text, sizeof(date_text), "%B %e", t);
   text_layer_set_text(date_layer, date_text);
+
+  if (HOURLY_VIBRATE && t->tm_min % 60 == 0) {
+    vibes_short_pulse();
+  }
 }
 
 static void window_load(Window *window) {
