@@ -1,0 +1,39 @@
+{
+  "version": "1.4.0",
+  "author": "geraintwhite@gmail.com",
+  "private": true,
+  "dependencies": {},
+  "keywords": [
+    "pebble-app"
+  ],
+  "pebble": {
+    "sdkVersion": "3",
+    "resources": {
+      "media": []
+    },
+    "projectType": "native",
+    "uuid": "7f6532f3-59a2-4fd2-9885-2371c0531df3",
+    "messageKeys": {
+      "KEY_INVERT_COLOURS": 2,
+      "KEY_HOURLY_VIBRATE": 4,
+      "KEY_BLUETOOTH_VIBRATE": 3,
+      "KEY_BATTERY_PERCENTAGE": 0,
+      "KEY_SHOW_DATE": 1
+    },
+    "enableMultiJS": false,
+    "displayName": "Arc Watchface",
+    "watchapp": {
+      "onlyShownOnCommunication": false,
+      "hiddenApp": false,
+      "watchface": true
+    },
+    "targetPlatforms": [
+      "aplite",
+      "basalt"
+    ],
+    "capabilities": [
+      "configurable"
+    ]
+  },
+  "name": "Arc Watchface"
+}
