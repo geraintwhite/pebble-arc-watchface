@@ -56,7 +56,7 @@ static void battery_handler(BatteryChargeState charge_state) {
 }
 
 static void bluetooth_handler(bool connected) {
-  if (connected != bluetooth_connected) {
+  if (BLUETOOTH_VIBRATE && connected != bluetooth_connected) {
     bluetooth_connected = connected;
     vibes_double_pulse();
   }
