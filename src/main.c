@@ -1,5 +1,4 @@
 #include <pebble.h>
-#include "drawarc.c"
 #include "settings.c"
 
 #define CIRCLE_THICKNESS        5
@@ -67,9 +66,21 @@ static void arc_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   Arc *arc = (Arc*) layer_get_data(layer);
 
-  GPoint origin = GPoint(bounds.size.w / 2, bounds.size.h / 2 - MARGIN);
+  GRect rect = GRect(
+      bounds.size.w / 2 - arc->radius,
+      bounds.size.h / 2 - arc->radius - MARGIN,
+      arc->radius * 2,
+      arc->radius * 2
+  );
+
   graphics_context_set_stroke_color(ctx, INVERT_COLOURS ? GColorBlack : GColorWhite);
-  graphics_draw_arc(ctx, origin, arc->radius, CIRCLE_THICKNESS, -90, 360 * arc->percent - 90);
+  graphics_context_set_stroke_width(ctx, CIRCLE_THICKNESS);
+
+  graphics_draw_arc(
+      ctx, rect,
+      GOvalScaleModeFitCircle,
+      0, DEG_TO_TRIGANGLE(360 * arc->percent)
+  );
 }
 
 static Layer *create_arc_layer(Layer *window_layer, GRect bounds, Layer *arc_layer, Arc *arc) {
@@ -98,7 +109,7 @@ static void update_time() {
   time_t now = time(NULL);
   struct tm *t = localtime(&now);
 
-  update_arc(hours_layer, (float) t->tm_hour / 12);
+  update_arc(hours_layer, (float) (t->tm_hour > 12 ? t->tm_hour - 12 : t->tm_hour) / 12);
   update_arc(minutes_layer, (float) t->tm_min / 60);
 
   strftime(date_text, sizeof(date_text), "%B %e", t);
